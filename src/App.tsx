@@ -5,7 +5,7 @@ import { AuthCallback } from './routes/AuthCallback';
 import { Dashboard } from './routes/Dashboard';
 import { Knowledge } from './routes/Knowledge';
 import { Usage } from './routes/Usage';
-import { GuildSettings } from './routes/GuildSettings';
+import { Settings } from './routes/Settings';
 import { NotFound } from './routes/NotFound';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AppLayout } from './components/layout/AppLayout';
@@ -31,7 +31,7 @@ export default function App() {
             <Route path="/guilds/:guildId" element={<Dashboard />} />
             <Route path="/guilds/:guildId/knowledge" element={<Knowledge />} />
             <Route path="/guilds/:guildId/usage" element={<Usage />} />
-            <Route path="/guilds/:guildId/settings" element={<GuildSettings />} />
+            <Route path="/guilds/:guildId/settings" element={<Settings />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
