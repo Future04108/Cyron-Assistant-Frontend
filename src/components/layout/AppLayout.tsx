@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
+import { GuildSubnav } from './GuildSubnav';
 import { GuildList } from '../GuildList';
 import { api } from '../../lib/api';
 
@@ -32,6 +33,7 @@ export const AppLayout = () => {
       <Sidebar />
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav currentGuildName={selectedGuild?.name} />
+        <GuildSubnav />
         {/* Mobile sidebar */}
         <div className="border-b border-slate-200 bg-white/80 px-4 py-2 backdrop-blur-lg md:hidden">
           <GuildList />

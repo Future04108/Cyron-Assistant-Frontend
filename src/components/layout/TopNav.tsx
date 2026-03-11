@@ -28,7 +28,7 @@ export const TopNav = ({ currentGuildName }: TopNavProps) => {
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-2 sm:flex">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white shadow-sm">
-              CA
+              <img src="../public/img/cyron-2.png" alt="Cyron Assistant" className="h-8 w-8" style={{borderRadius: '50%'}} />
             </div>
             <div className="leading-tight">
               <h1 className="text-sm font-semibold tracking-tight">
@@ -65,7 +65,7 @@ export const TopNav = ({ currentGuildName }: TopNavProps) => {
             </div>
             <div className="hidden flex-col text-right text-xs sm:flex">
               <span className="font-medium">{user?.username ?? 'User'}</span>
-              <span className="text-text-muted">Logged in with Discord</span>
+              <span className="text-text-muted">logged in</span>
             </div>
           </div>
           <Button

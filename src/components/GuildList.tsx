@@ -24,18 +24,8 @@ export const GuildList = () => {
   const params = useParams<{ guildId?: string }>();
 
   return (
-    <div className="flex h-full flex-col px-4 py-6">
-      <div className="mb-6 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white shadow-sm">
-          CA
-        </div>
-        <div>
-          <p className="text-sm font-semibold leading-tight">Cyron Assistant</p>
-          <p className="text-xs text-text-muted">AI Ticket Bot</p>
-        </div>
-      </div>
-
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
+    <div className="flex h-full flex-col px-3 py-4" style={{width: '100%'}}>
+      <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">
         Servers
       </p>
 
@@ -59,15 +49,17 @@ export const GuildList = () => {
             const isActive = basePathMatch || rootSelected;
 
             return (
-              <motion.div
+              <motion.button
                 key={guild.id}
+                type="button"
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.04 }}
+                style={{width: '100%' , textAlign: 'left'}}
               >
                 <Link
                   to={`/guilds/${guild.id}`}
-                  className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm transition-colors ${
+                  className={`flex items-center gap-3 rounded-lg px-2 py-2 text-xs transition-colors ${
                     isActive
                       ? 'bg-primary/10 text-primary shadow-sm'
                       : 'text-text-muted hover:bg-slate-100/80 hover:text-text-primary'
@@ -85,7 +77,7 @@ export const GuildList = () => {
                     )}
                   </div>
                   <div className="flex flex-1 flex-col">
-                    <span className="truncate text-xs font-medium">
+                    <span className="truncate text-[11px] font-medium">
                       {guild.name}
                     </span>
                     {guild.plan && (
@@ -95,7 +87,7 @@ export const GuildList = () => {
                     )}
                   </div>
                 </Link>
-              </motion.div>
+              </motion.button>
             );
           })}
       </div>
