@@ -21,9 +21,18 @@ export const GuildSubnav = () => {
 
   if (!guildId) return null;
 
-  const activeId =
-    tabs.find((tab) => location.pathname.startsWith(tab.to(guildId)))?.id ??
-    'overview';
+  // Derive active tab based on the current route.
+  // We treat `/guilds/:id` as Overview, and any deeper paths as specific tabs.
+  const basePath = `/guilds/${guildId}`;
+  let activeId: string = 'overview';
+
+  if (location.pathname.startsWith(`${basePath}/knowledge`)) {
+    activeId = 'knowledge';
+  } else if (location.pathname.startsWith(`${basePath}/settings`)) {
+    activeId = 'settings';
+  } else if (location.pathname === basePath) {
+    activeId = 'overview';
+  }
 
   return (
     <div className="border-b border-slate-200 bg-white/80">
