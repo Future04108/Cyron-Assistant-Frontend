@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import type { MouseEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -8,12 +9,17 @@ interface Guild {
   name: string;
   icon_url?: string | null;
   plan?: 'free' | 'pro' | 'business' | string;
+  has_bot?: boolean;
 }
 
 async function fetchGuilds(): Promise<Guild[]> {
   const res = await api.get<Guild[]>('/guilds');
   return res.data;
 }
+
+const BOT_INVITE_BASE_URL =
+  import.meta.env.VITE_DISCORD_BOT_INVITE_URL ??
+  'https://discord.com/oauth2/authorize?client_id=1473403672086970459&permissions=8&integration_type=0&scope=applications.commands+bot';
 
 export const GuildList = () => {
   const { data: guilds, isLoading, isError } = useQuery({
@@ -47,6 +53,13 @@ export const GuildList = () => {
             const rootSelected =
               !params.guildId && location.pathname === '/' && index === 0;
             const isActive = basePathMatch || rootSelected;
+
+            const handleAddBot = (e: MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const url = `${BOT_INVITE_BASE_URL}&guild_id=${guild.id}&disable_guild_select=true`;
+              window.open(url, '_blank', 'noopener,noreferrer');
+            };
 
             return (
               <motion.button
@@ -84,6 +97,21 @@ export const GuildList = () => {
                       <span className="mt-0.5 inline-flex w-fit rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium capitalize text-slate-600">
                         {guild.plan}
                       </span>
+                    )}
+                  </div>
+                  <div className="ml-1 flex items-center">
+                    {guild.has_bot ? (
+                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                        Bot installed
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleAddBot}
+                        className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary hover:bg-primary/20"
+                      >
+                        Add bot to server
+                      </button>
                     )}
                   </div>
                 </Link>
