@@ -90,7 +90,7 @@ export const GuildList = () => {
                     )}
                   </div>
                   <div className="flex flex-1 flex-col">
-                    <span className="truncate text-[11px] font-medium">
+                    <span className="truncate text-[11px] font-medium" style = {{maxWidth : '129px'}}>
                       {guild.name}
                     </span>
                     {guild.plan && (
@@ -101,14 +101,32 @@ export const GuildList = () => {
                   </div>
                   <div className="ml-1 flex items-center">
                     {guild.has_bot ? (
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                      <button
+                        type="button"
+                        onClick={handleAddBot}
+                        className="rounded-full px-2 py-0.5 text-[11px] font-medium text-white"
+                        style={{
+                          width: '9vh',
+                          backgroundColor: 'rgb(4 120 87 / var(--tw-text-opacity, 1))',
+                          textAlign: 'center',
+                          lineHeight: '12px',
+                        }}
+                        title="Reinstall or manage bot for this server"
+                      >
                         Bot installed
-                      </span>
+                      </button>
                     ) : (
                       <button
                         type="button"
                         onClick={handleAddBot}
-                        className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary hover:bg-primary/20"
+                        className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/50"
+                        style={{
+                          width: '9vh',
+                          color: 'white',
+                          backgroundColor: '#1fb7d1',
+                          textAlign: 'center',
+                          lineHeight: '12px',
+                        }}
                       >
                         Add bot to server
                       </button>

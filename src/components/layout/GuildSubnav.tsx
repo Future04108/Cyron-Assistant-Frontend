@@ -50,6 +50,7 @@ export const GuildSubnav = () => {
                   <motion.span
                     layoutId="guildSubnav"
                     className="absolute inset-0 rounded-full bg-primary/10"
+                    style={{backgroundColor : 'rgb(26 183 239 / 27%)'}}
                     transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                   />
                 )}
