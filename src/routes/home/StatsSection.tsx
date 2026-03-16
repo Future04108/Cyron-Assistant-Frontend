@@ -1,8 +1,16 @@
 import { motion } from 'framer-motion';
 import { FaClock, FaRobot, FaServer, FaTicketAlt } from 'react-icons/fa';
 import CountUp from '../../components/animation/countUp';
+import { useApp } from '../../context/AppContext';
 
 export const StatsSection = () => {
+  const { stats } = useApp();
+  const byId = (id: string) => stats.find((s) => s.id === id);
+  const servers = byId('servers');
+  const tickets = byId('tickets');
+  const aiServers = byId('ai-servers');
+  const response = byId('response');
+
   return (
     <section className="border-b border-slate-200 bg-gradient-to-br from-sky-50 via-white to-indigo-50 text-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-16">
@@ -39,12 +47,14 @@ export const StatsSection = () => {
               <span className="mr-2">
                 <FaServer />
               </span>
-              Servers
+              {servers?.label ?? 'Servers'}
             </p>
             <p className="mt-3 text-3xl font-semibold text-sky-600 drop-shadow">
-              <CountUp end={2735} />
+              <CountUp end={servers?.value ?? 2735} />
             </p>
-            <p className="mt-1 text-[11px] text-sky-600">Discord servers using our bot</p>
+            <p className="mt-1 text-[11px] text-sky-600">
+              {servers?.helper ?? 'Discord servers using our bot'}
+            </p>
           </motion.div>
 
           <motion.div
@@ -59,12 +69,14 @@ export const StatsSection = () => {
               <span className="mr-2">
                 <FaTicketAlt />
               </span>
-              Tickets handled
+              {tickets?.label ?? 'Tickets handled'}
             </p>
             <p className="mt-3 text-3xl font-semibold text-emerald-600 drop-shadow">
-              <CountUp end={143769} />
+              <CountUp end={tickets?.value ?? 143769} />
             </p>
-            <p className="mt-1 text-[11px] text-emerald-600">Tickets resolved automatically</p>
+            <p className="mt-1 text-[11px] text-emerald-600">
+              {tickets?.helper ?? 'Tickets resolved automatically'}
+            </p>
           </motion.div>
 
           <motion.div
@@ -79,12 +91,14 @@ export const StatsSection = () => {
               <span className="mr-2">
                 <FaRobot />
               </span>
-              AI‑enabled servers
+              {aiServers?.label ?? 'AI‑enabled servers'}
             </p>
             <p className="mt-3 text-3xl font-semibold text-indigo-600 drop-shadow">
-              <CountUp end={253} />
+              <CountUp end={aiServers?.value ?? 253} />
             </p>
-            <p className="mt-1 text-[11px] text-indigo-600">Servers with automation switched on</p>
+            <p className="mt-1 text-[11px] text-indigo-600">
+              {aiServers?.helper ?? 'Servers with automation switched on'}
+            </p>
           </motion.div>
 
           <motion.div
@@ -99,12 +113,15 @@ export const StatsSection = () => {
               <span className="mr-2">
                 <FaClock />
               </span>
-              Avg response time
+              {response?.label ?? 'Avg response time'}
             </p>
             <p className="mt-3 text-3xl font-semibold text-amber-600 drop-shadow">
-              <CountUp end={4} />s
+              <CountUp end={response?.value ?? 4} />
+              {response?.suffix ?? 's'}
             </p>
-            <p className="mt-1 text-[11px] text-amber-700">Lightning‑fast AI ticket replies</p>
+            <p className="mt-1 text-[11px] text-amber-700">
+              {response?.helper ?? 'Lightning‑fast AI ticket replies'}
+            </p>
           </motion.div>
         </motion.div>
       </div>

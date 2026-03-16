@@ -1,40 +1,9 @@
 import { motion } from 'framer-motion';
 import { FaQuoteLeft, FaQuoteRight, FaStar } from 'react-icons/fa';
-
-const reviews = [
-  {
-    textParts: [
-      {
-        left: 'We went from waking up to a wall of',
-        right: 'even sees them.',
-      },
-      'unanswered tickets to most common questions being answered before a mod',
-    ],
-    reviewer: 'Community manager, SaaS server',
-  },
-  {
-    textParts: [
-      {
-        left: 'Our staff still handles edge cases, but',
-        right: '70% of the ticket volume.',
-      },
-      'Cyron Assistant quietly takes care of 60 -',
-    ],
-    reviewer: 'Head of support, gaming community',
-  },
-  {
-    textParts: [
-      {
-        left: 'Setup was faster than expected. Once we',
-        right: 'adding another reliable staff member.',
-      },
-      'tuned the prompts and limits, it felt like',
-    ],
-    reviewer: 'Server owner, premium Discord',
-  },
-];
+import { useApp } from '../../context/AppContext';
 
 export const ReviewsSection = () => {
+  const { reviews } = useApp();
   return (
     <section className="border-b border-slate-200 bg-slate-50">
       <div className="mx-auto max-w-6xl px-6 py-16">
@@ -52,7 +21,7 @@ export const ReviewsSection = () => {
           {reviews.map((review, idx) => (
             <motion.div
               className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-              key={idx}
+              key={review.id ?? idx}
               initial={{ opacity: 0, y: 36, scale: 0.96 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true, amount: 0.2 }}

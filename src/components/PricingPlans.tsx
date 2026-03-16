@@ -2,34 +2,14 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { motion } from 'framer-motion';
 import { FaCheck } from 'react-icons/fa';
-
-const FREE_FEATURES = [
-  'Core AI ticket replies',
-  'Limited monthly tokens & tickets',
-  'Basic knowledge base & canned replies',
-  'Community support via Discord',
-] as const;
-
-const PRO_FEATURES = [
-  '5-10× Free token & ticket limits',
-  'Priority AI models & faster responses',
-  'Customizable ticket embeds & branding',
-  'Fine‑grained concurrency & rate limits',
-  'Usage analytics with export‑ready charts',
-  'Email support with 24-48h response',
-] as const;
-
-const BUSINESS_FEATURES = [
-  'Custom token, ticket, and concurrency limits',
-  'Dedicated onboarding & configuration with your team',
-  'Priority incident response & uptime SLAs',
-  'Advanced audit logs & compliance‑friendly controls',
-  'Roadmap input & early access to new features',
-  'Regular success check‑ins and optimization reviews',
-] as const;
+import { useApp } from '../context/AppContext';
 
 export const PricingPlans = () => {
   const { isAuthenticated, loginWithDiscord } = useAuth();
+  const { pricingPlans, setSelectedPlan } = useApp();
+  const freePlan = pricingPlans.find((p) => p.id === 'free');
+  const proPlan = pricingPlans.find((p) => p.id === 'pro');
+  const businessPlan = pricingPlans.find((p) => p.id === 'business');
 
   return (
     <section className="border-b border-slate-200 bg-white">
@@ -59,17 +39,22 @@ export const PricingPlans = () => {
           >
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-700">
-                Free
+                {freePlan?.name ?? 'Free'}
               </p>
               <div className="mt-4 flex items-end gap-2">
-                <p className="mt-4 text-4xl font-semibold text-slate-900">$0</p>
-                <p className="mt-1 text-sm text-slate-500"> / month</p>
+                <p className="mt-4 text-4xl font-semibold text-slate-900">
+                  {freePlan?.priceLabel ?? '$0'}
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {freePlan?.priceSubLabel ?? ' / month'}
+                </p>
               </div>
               <p className="mt-4 text-base text-slate-700">
-                Perfect for getting started with basic ticket management and AI replies.
+                {freePlan?.description ??
+                  'Perfect for getting started with basic ticket management and AI replies.'}
               </p>
               <ul className="mt-5 space-y-2.5 text-sm text-slate-700">
-                {FREE_FEATURES.map((feature) => (
+                {(freePlan?.features ?? []).map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5">
                     <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center text-sky-600">
                       <FaCheck className="h-3.5 w-3.5" />
@@ -92,7 +77,7 @@ export const PricingPlans = () => {
                       }
                 }
               >
-                Get started free
+                {freePlan?.ctaLabel ?? 'Get started free'}
               </Link>
             </div>
           </motion.div>
@@ -109,17 +94,22 @@ export const PricingPlans = () => {
             </div>
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">
-                Pro
+                {proPlan?.name ?? 'Pro'}
               </p>
               <div className="mt-4 flex items-end gap-2">
-                <p className="mt-4 text-4xl font-semibold text-slate-900">$9</p>
-                <p className="mt-1 text-sm text-slate-600"> / month</p>
+                <p className="mt-4 text-4xl font-semibold text-slate-900">
+                  {proPlan?.priceLabel ?? '$9'}
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {proPlan?.priceSubLabel ?? ' / month'}
+                </p>
               </div>
               <p className="mt-4 text-base text-slate-800">
-                For serious support teams that want reliable AI coverage with human oversight.
+                {proPlan?.description ??
+                  'For serious support teams that want reliable AI coverage with human oversight.'}
               </p>
               <ul className="mt-5 space-y-2.5 text-sm text-slate-800">
-                {PRO_FEATURES.map((feature) => (
+                {(proPlan?.features ?? []).map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5">
                     <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center text-sky-600">
                       <FaCheck className="h-3.5 w-3.5" />
@@ -135,14 +125,14 @@ export const PricingPlans = () => {
                 className="inline-flex w-full items-center justify-center rounded-full bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-500/40 transition hover:bg-sky-600"
                 onClick={
                   isAuthenticated
-                    ? undefined
+                    ? () => setSelectedPlan('pro')
                     : (e) => {
                         e.preventDefault();
                         loginWithDiscord();
                       }
                 }
               >
-                Start Pro trial
+                {proPlan?.ctaLabel ?? 'Start Pro trial'}
               </Link>
             </div>
           </motion.div>
@@ -156,18 +146,22 @@ export const PricingPlans = () => {
           >
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                Business
+                {businessPlan?.name ?? 'Business'}
               </p>
               <div className="mt-4 flex items-end gap-2">
-                <p className="text-4xl font-semibold text-slate-900">$20</p>
-                <p className="text-sm text-slate-600">custom pricing</p>
+                <p className="text-4xl font-semibold text-slate-900">
+                  {businessPlan?.priceLabel ?? '$20'}
+                </p>
+                <p className="text-sm text-slate-600">
+                  {businessPlan?.priceSubLabel ?? 'custom pricing'}
+                </p>
               </div>
               <p className="mt-4 text-base text-slate-800">
-                For large communities, scaled support teams, and SaaS products that need guaranteed
-                performance and closer partnership.
+                {businessPlan?.description ??
+                  'For large communities, scaled support teams, and SaaS products that need guaranteed performance and closer partnership.'}
               </p>
               <ul className="mt-5 space-y-2.5 text-sm text-slate-800">
-                {BUSINESS_FEATURES.map((feature) => (
+                {(businessPlan?.features ?? []).map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5">
                     <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center text-sky-600">
                       <FaCheck className="h-3.5 w-3.5" />
@@ -178,12 +172,20 @@ export const PricingPlans = () => {
               </ul>
             </div>
             <div className="mt-6">
-              <a
-                href="mailto:support@example.com"
+              <Link
+                to={isAuthenticated ? '/payment?plan=business' : '#'}
                 className="inline-flex w-full items-center justify-center rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-500/40 transition hover:bg-emerald-600"
+                onClick={
+                  isAuthenticated
+                    ? () => setSelectedPlan('business')
+                    : (e) => {
+                        e.preventDefault();
+                        loginWithDiscord();
+                      }
+                }
               >
-                Contact sales
-              </a>
+                {businessPlan?.ctaLabel ?? 'Contact sales'}
+              </Link>
             </div>
           </motion.div>
         </div>

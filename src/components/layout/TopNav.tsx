@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { useAuth } from '../../hooks/useAuth';
@@ -19,34 +19,9 @@ const NAV_LINKS = [
 export const TopNav = ({ currentGuildName }: TopNavProps) => {
   const { user, isAuthenticated, loginWithDiscord, logout } = useAuth();
   const location = useLocation();
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window === 'undefined') return 'light';
+  const { theme, toggleTheme } = useApp();
 
-    const stored = window.localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark') return stored;
-
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
-  });
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-
-    window.localStorage.setItem('theme', theme);
-    // Let other parts of the app react immediately (storage event doesn't fire in same tab).
-    window.dispatchEvent(new Event('themechange'));
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
+  // Theme persistence + `html.dark` are handled globally by AppProvider.
 
   const initials = user?.username
     ? user.username

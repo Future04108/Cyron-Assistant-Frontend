@@ -32,7 +32,7 @@ export const PremiumCtaSection = ({
                     }
               }
             >
-              <FaCogs className="mr-2" /> Create your dashboard
+              <FaCogs className="mr-2" /> Go to dashboard
             </Link>
             <a
               href="mailto:support@example.com"

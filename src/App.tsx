@@ -15,8 +15,15 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/premium" element={<Premium />} />
-        <Route path="/payment" element={<Payment />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute>
+              <Payment />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           element={

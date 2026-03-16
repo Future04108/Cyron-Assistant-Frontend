@@ -4,82 +4,48 @@ import { TopNav } from '../../components/layout/TopNav';
 import { Footer } from '../../components/layout/Footer';
 import { PageTransition } from '../../components/motion/PageTransition';
 import { useAuth } from '../../hooks/useAuth';
+import { useApp } from '../../context/AppContext';
 import { motion } from 'framer-motion';
 import { FaCheck, FaLock, FaCreditCard, FaShieldAlt } from 'react-icons/fa';
 import clsx from 'clsx';
 
-type PlanType = 'free' | 'pro' | 'business';
+type PlanType = 'pro' | 'business';
 
-interface PlanDetails {
-  name: string;
-  price: string;
-  period: string;
-  features: string[];
-  color: string;
-  bgColor: string;
-  borderColor: string;
-}
-
-const PLAN_DETAILS: Record<PlanType, PlanDetails> = {
-  free: {
-    name: 'Free',
-    price: '$0',
-    period: 'month',
-    features: [
-      'Core AI ticket replies',
-      'Limited monthly tokens & tickets',
-      'Basic knowledge base & canned replies',
-      'Community support via Discord',
-    ],
-    color: 'text-slate-700',
-    bgColor: 'bg-slate-50',
-    borderColor: 'border-slate-200',
-  },
+const ACCENT: Record<
+  PlanType,
+  { color: string; darkColor: string; bgColor: string; borderColor: string; darkAccent: string, checkColor: string }
+> = {
   pro: {
-    name: 'Pro',
-    price: '$9',
-    period: 'month',
-    features: [
-      '5-10× Free token & ticket limits',
-      'Priority AI models & faster responses',
-      'Customizable ticket embeds & branding',
-      'Fine‑grained concurrency & rate limits',
-      'Usage analytics with export‑ready charts',
-      'Email support with 24-48h response',
-    ],
-    color: 'text-sky-700',
+    color: 'text-sky-200',
+    darkColor: 'text-slate-700',
     bgColor: 'bg-sky-50',
-    borderColor: 'border-sky-200',
+    borderColor: 'border-sky-400',
+    darkAccent: 'text-sky-300',
+    checkColor: 'text-sky-600',
   },
   business: {
-    name: 'Business',
-    price: 'Custom',
-    period: 'pricing',
-    features: [
-      'Custom token, ticket, and concurrency limits',
-      'Dedicated onboarding & configuration with your team',
-      'Priority incident response & uptime SLAs',
-      'Advanced audit logs & compliance‑friendly controls',
-      'Roadmap input & early access to new features',
-      'Regular success check‑ins and optimization reviews',
-    ],
-    color: 'text-emerald-700',
+    color: 'text-emerald-100',
+    darkColor: 'text-slate-700',
     bgColor: 'bg-emerald-50',
-    borderColor: 'border-emerald-200',
+    borderColor: 'border-emerald-300',
+    darkAccent: 'text-emerald-300',
+    checkColor: 'text-emerald-600',
   },
 };
 
 export const Payment = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const planParam = (searchParams.get('plan') || 'pro') as PlanType;
-  const [plan, setPlan] = useState<PlanType>(planParam);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window === 'undefined') return 'light';
-    const stored = window.localStorage.getItem('theme');
-    return stored === 'dark' ? 'dark' : 'light';
-  });
+  const { isAuthenticated, loading } = useAuth();
+  const { theme, setSelectedPlan, selectedPlan, pricingPlans } = useApp();
+  const rawPlanParam = searchParams.get('plan');
+  const planParam: PlanType =
+    rawPlanParam === 'pro' || rawPlanParam === 'business'
+      ? rawPlanParam
+      : 'pro';
+  const effectivePlanFromUrl: PlanType =
+    planParam === 'pro' && selectedPlan === 'business' ? 'business' : planParam;
+  const [plan, setPlan] = useState<PlanType>(effectivePlanFromUrl);
 
   const [formData, setFormData] = useState({
     cardNumber: '',
@@ -92,31 +58,30 @@ export const Payment = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Keep this page synced with the app theme toggle (TopNav writes to localStorage + emits `themechange`).
-  useEffect(() => {
-    if (typeof window === 'undefined' || typeof document === 'undefined') return;
-
-    const applyThemeFromStorage = () => {
-      const stored = window.localStorage.getItem('theme');
-      const nextTheme: 'light' | 'dark' = stored === 'dark' ? 'dark' : 'light';
-      setTheme(nextTheme);
-      document.documentElement.classList.toggle('dark', nextTheme === 'dark');
-    };
-
-    applyThemeFromStorage();
-    window.addEventListener('themechange', applyThemeFromStorage);
-    window.addEventListener('storage', applyThemeFromStorage);
-    return () => {
-      window.removeEventListener('themechange', applyThemeFromStorage);
-      window.removeEventListener('storage', applyThemeFromStorage);
-    };
-  }, []);
+  // Theme is provided globally by AppProvider.
 
   useEffect(() => {
+    // Track which plan user is trying to pay for (global + local page state).
+    setSelectedPlan(plan);
+  }, [plan, setSelectedPlan]);
+
+  useEffect(() => {
+    // If something else updates the selected plan (e.g., PricingPlans click), reflect it here.
+    if (selectedPlan === plan) return;
+    if (selectedPlan === 'pro' || selectedPlan === 'business') {
+      setPlan(selectedPlan);
+    } else {
+      // Fallback: treat any other value (e.g. 'free') as Pro for checkout.
+      setPlan('pro');
+    }
+  }, [selectedPlan, plan]);
+
+  useEffect(() => {
+    if (loading) return;
     if (!isAuthenticated) {
       navigate('/premium', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, loading, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -184,11 +149,12 @@ export const Payment = () => {
     }, 2000);
   };
 
-  const planDetails = PLAN_DETAILS[plan];
+  const planData = pricingPlans.find((p) => p.id === plan);
+  const accent = ACCENT[plan];
   const isDark = theme === 'dark';
   const summarySurface = isDark
     ? 'bg-slate-900/60 border-slate-800'
-    : `${planDetails.bgColor} ${planDetails.borderColor}`;
+    : `${accent.bgColor} ${accent.borderColor}`;
   const formSurface = isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200';
   const headingText = isDark ? 'text-slate-100' : 'text-slate-900';
   const bodyText = isDark ? 'text-slate-300' : 'text-slate-600';
@@ -196,6 +162,18 @@ export const Payment = () => {
   const inputBase = isDark
     ? 'bg-slate-800 text-slate-100 placeholder:text-slate-400 border-slate-700 focus:border-sky-400 focus:ring-sky-400'
     : 'bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-sky-500 focus:ring-sky-500';
+
+  if (loading) {
+    return (
+      <>
+        <TopNav currentGuildName={null} />
+        <div className="flex min-h-[70vh] items-center justify-center text-slate-600">
+          Loading checkout…
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   if (!isAuthenticated) {
     return null;
@@ -240,7 +218,8 @@ export const Payment = () => {
                 <motion.div
                   className={clsx(
                     'rounded-3xl border p-8 shadow-sm',
-                    summarySurface
+                    accent.borderColor,
+                    isDark ? '' : accent.bgColor
                   )}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -250,48 +229,39 @@ export const Payment = () => {
                     <p
                       className={clsx(
                         'text-sm font-semibold uppercase tracking-[0.2em]',
-                        isDark
-                          ? plan === 'pro'
-                            ? 'text-sky-300'
-                            : plan === 'business'
-                              ? 'text-emerald-300'
-                              : 'text-slate-200'
-                          : planDetails.color
+                        accent.checkColor
                       )}
                     >
-                      {planDetails.name}
+                      {planData?.name ?? plan}
                     </p>
                     <div className="mt-4 flex items-end gap-2">
                       <p className={clsx('text-4xl font-semibold', headingText)}>
-                        {planDetails.price}
+                        {planData?.priceLabel ?? ''}
                       </p>
-                      <p className={clsx('mb-1 text-sm', bodyText)}>
-                        /{planDetails.period}
+                      <p className={clsx('mb-1 text-sm', isDark ? accent.color : accent.darkColor)}>
+                        {planData?.priceSubLabel ?? ''}
                       </p>
                     </div>
                   </div>
 
                   <div className="mb-6">
-                    <p
-                      className={clsx(
-                        'text-sm font-medium',
-                        isDark ? 'text-slate-200' : 'text-slate-700'
-                      )}
-                    >
-                      Plan includes:
-                    </p>
+                    {planData?.description && (
+                      <p className={clsx('mb-4 text-sm', isDark ? accent.color : accent.darkColor)}>
+                        {planData.description}
+                      </p>
+                    )}
                     <ul
                       className={clsx(
                         'mt-3 space-y-2.5 text-sm',
-                        isDark ? 'text-slate-300' : 'text-slate-700'
+                        isDark ? accent.color : 'text-slate-700'
                       )}
                     >
-                      {planDetails.features.map((feature) => (
+                      {(planData?.features ?? []).map((feature) => (
                         <li key={feature} className="flex items-start gap-2.5">
                           <span
                             className={clsx(
                               'mt-0.5 inline-flex h-5 w-5 items-center justify-center',
-                              isDark ? 'text-sky-400' : 'text-sky-600'
+                              isDark ? accent.color : accent.checkColor
                             )}
                           >
                             <FaCheck className="h-3.5 w-3.5" />
