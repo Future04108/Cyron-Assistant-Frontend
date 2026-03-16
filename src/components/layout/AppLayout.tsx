@@ -1,17 +1,10 @@
 import { Outlet, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
-import { GuildSubnav } from './GuildSubnav';
-import { GuildList } from '../GuildList';
+import { GuildSidebarNav } from './GuildSidebarNav';
+import { Footer } from './Footer';
 import { api } from '../../lib/api';
-
-interface Guild {
-  id: string;
-  name: string;
-  plan?: 'free' | 'pro' | 'business' | string;
-}
+import { AnimatedOutlet } from '../motion/AnimatedOutlet';
 
 async function fetchGuilds(): Promise<Guild[]> {
   const res = await api.get<Guild[]>('/guilds');
@@ -29,28 +22,27 @@ export const AppLayout = () => {
     guilds?.find((g) => String(g.id) === params.guildId) ?? null;
 
   return (
-    <div className="flex min-h-screen bg-bg-base">
-      <Sidebar />
-      <div className="flex min-h-screen flex-1 flex-col">
-        <TopNav currentGuildName={selectedGuild?.name} />
-        <GuildSubnav />
-        {/* Mobile sidebar */}
-        <div className="border-b border-slate-200 bg-white/80 px-4 py-2 backdrop-blur-lg md:hidden">
-          <GuildList />
-        </div>
-        <main className="flex-1 px-6 pb-8 pt-4">
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="mx-auto max-w-6xl"
-          >
-            <Outlet />
-          </motion.div>
-        </main>
+    <>
+      <TopNav currentGuildName={selectedGuild?.name} />
+      <div className="min-h-screen bg-bg-base">
+        {params.guildId ? (
+          <div className="mx-auto flex items-start min-h-screen max-w-6xl gap-8 px-6 pb-14 pt-8 sm:px-8">
+            <GuildSidebarNav />
+            <main className="flex-1">
+              <div className="w-full">
+                <AnimatedOutlet />
+              </div>
+            </main>
+          </div>
+        ) : (
+          <main className="flex-1 px-6 pb-14 pt-8 sm:px-8">
+            <div className="mx-auto w-full max-w-7xl">
+              <AnimatedOutlet />
+            </div>
+          </main>
+        )}
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
-

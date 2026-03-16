@@ -21,8 +21,6 @@ export const GuildSubnav = () => {
 
   if (!guildId) return null;
 
-  // Derive active tab based on the current route.
-  // We treat `/guilds/:id` as Overview, and any deeper paths as specific tabs.
   const basePath = `/guilds/${guildId}`;
   let activeId: string = 'overview';
 
