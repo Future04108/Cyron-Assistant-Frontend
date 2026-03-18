@@ -113,11 +113,6 @@ export const Settings = () => {
 
   return (
     <>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 border border-slate-200">
-          JOB&nbsp;·&nbsp;free plan
-        </span>
-      </div>
       <motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}

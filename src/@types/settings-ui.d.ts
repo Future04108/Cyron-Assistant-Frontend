@@ -23,6 +23,11 @@ interface UseSettingsResult {
   guildError: boolean;
   usage?: UsageStats;
   usageLoading: boolean;
+  usageError: boolean;
+  historyLoading: boolean;
+  historyError: boolean;
+  logsLoading: boolean;
+  logsError: boolean;
   knowledge?: KnowledgeEntry[];
   knowledgeLoading: boolean;
   knowledgeError: boolean;

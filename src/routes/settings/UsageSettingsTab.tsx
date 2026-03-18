@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 
 import { Loader } from "../../components/ui/Loader";
+import { useApp } from "../../context/AppContext";
 
 export const UsageTab = ({
     usage,
@@ -32,6 +33,9 @@ export const UsageTab = ({
     chartData: any[];
     recentActivity: any[];
 }) => {
+    const { theme } = useApp();
+    const isDark = theme === 'dark';
+
     return (
         <motion.div
             key="usage"
@@ -143,7 +147,27 @@ export const UsageTab = ({
                                     <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#94a3b8" />
                                     <YAxis tick={{ fontSize: 10 }} stroke="#94a3b8" />
                                     <Tooltip
-                                        contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                                        contentStyle={{
+                                            fontSize: 12,
+                                            borderRadius: 12,
+                                            border: isDark ? '1px solid rgba(148,163,184,0.22)' : '1px solid rgba(148,163,184,0.35)',
+                                            backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.98)',
+                                            color: isDark ? '#e2e8f0' : '#0f172a',
+                                            boxShadow: isDark
+                                                ? '0 18px 45px rgba(0, 0, 0, 0.55)'
+                                                : '0 18px 45px rgba(15, 23, 42, 0.12)',
+                                        }}
+                                        labelStyle={{
+                                            color: isDark ? '#cbd5e1' : '#334155',
+                                            fontWeight: 600,
+                                        }}
+                                        itemStyle={{
+                                            color: isDark ? '#e2e8f0' : '#0f172a',
+                                        }}
+                                        cursor={{
+                                            stroke: isDark ? 'rgba(148,163,184,0.35)' : 'rgba(148,163,184,0.45)',
+                                            strokeWidth: 1,
+                                        }}
                                         formatter={(value) => [
                                             (typeof value === 'number' ? value : Number(value ?? 0)).toLocaleString(),
                                             'Tokens',

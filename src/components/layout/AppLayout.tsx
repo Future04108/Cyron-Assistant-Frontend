@@ -27,7 +27,7 @@ export const AppLayout = () => {
       <div className="min-h-screen bg-bg-base">
         {params.guildId ? (
           <div className="mx-auto flex items-start min-h-screen max-w-6xl gap-8 px-6 pb-14 pt-8 sm:px-8">
-            <GuildSidebarNav />
+            <GuildSidebarNav guild={selectedGuild} />
             <main className="flex-1">
               <div className="w-full">
                 <AnimatedOutlet />
