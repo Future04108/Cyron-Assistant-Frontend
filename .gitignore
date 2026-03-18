@@ -41,3 +41,6 @@ Thumbs.db
 .turbo/
 
 cursor_ai_ticket_assistant_saas_discord.md
+
+*.lock
+package-lock.json

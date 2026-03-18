@@ -1,57 +1,53 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAlert } from 'react-alert';
 import { useAuth } from '../hooks/useAuth';
-import { api } from '../lib/api';
-
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
+import { API_BASE_URL } from '../lib/config';
 
 export const AuthCallback = () => {
-  const query = useQuery();
+  const location = useLocation();
   const navigate = useNavigate();
   const { setAuthToken } = useAuth();
+  const alert = useAlert();
   const [error, setError] = useState<string | null>(null);
+  const ranOnce = useRef(false);
+
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const code = params.get('code');
+  const state = params.get('state');
+  const token = params.get('token');
 
   useEffect(() => {
-    const code = query.get('code');
-    const state = query.get('state');
+    if (ranOnce.current) return;
+    ranOnce.current = true;
 
-    if (!code || !state) {
-      // If callback params are missing, send the user to home instead of a
-      // non-existent /login page (prevents a brief 404 flash on Vercel).
-      navigate('/?error=missing_code', { replace: true });
-      return;
-    }
-
-    const doExchange = async () => {
-      try {
-        const res = await api.post<{ token: string; redirect: string }>('/auth/callback', null, {
-          params: { code, state },
-        });
-        const { token, redirect } = res.data;
-        if (!token) {
-          throw new Error('Missing token in callback response');
-        }
+    try {
+      // Flow A: backend already redirected here with ?token=...
+      if (token) {
         setAuthToken(token);
-        navigate(redirect || '/', { replace: true });
-      } catch (e: any) {
-        const msg =
-          e?.response?.data?.detail ||
-          e?.message ||
-          'Failed to complete Discord login. Please try again.';
-        setError(msg);
-        // On error, also redirect to home with an error flag rather than /login
-        // to avoid hitting a missing route in the hosted marketing shell.
-        navigate(`/?error=${encodeURIComponent('oauth_failed')}`, {
-          replace: true,
-        });
+        navigate('/', { replace: true });
+        return;
       }
-    };
 
-    void doExchange();
-  }, [navigate, query, setAuthToken]);
+      // Flow B: Discord redirected here with ?code=...&state=...
+      if (code && state) {
+        const url = new URL('/auth/callback', API_BASE_URL);
+        url.searchParams.set('code', code);
+        url.searchParams.set('state', state);
+        window.location.assign(url.toString());
+        return;
+      }
+
+      const msg = 'Missing OAuth parameters. Please try signing in again.';
+      setError(msg);
+      alert.error(msg);
+    } catch (err) {
+      const msg = 'Something went wrong during authentication. Please try again.';
+      setError(msg);
+      alert.error(msg);
+    }
+  }, [alert, code, navigate, setAuthToken, state, token]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-base px-4">
@@ -62,7 +58,7 @@ export const AuthCallback = () => {
         className="rounded-2xl bg-white px-6 py-5 shadow-soft"
       >
         <p className="text-sm text-text-muted">
-          {error ? 'Login failed. Redirecting…' : 'Finishing sign-in with Discord...'}
+          {error ? 'Login failed. Please try again.' : 'Finishing sign-in with Discord...'}
         </p>
       </motion.div>
     </div>

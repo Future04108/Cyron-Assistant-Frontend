@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+// @ts-expect-error react-alert ships without TS types in this repo
+import { useAlert } from 'react-alert';
 import { TopNav } from '../../components/layout/TopNav';
 import { Footer } from '../../components/layout/Footer';
 import { PageTransition } from '../../components/motion/PageTransition';
@@ -45,6 +47,7 @@ export const Payment = () => {
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useAuth();
   const { theme, setSelectedPlan, selectedPlan, pricingPlans } = useApp();
+  const alert = useAlert();
   const rawPlanParam = searchParams.get('plan');
   const planParam: PlanType =
     rawPlanParam === 'pro' || rawPlanParam === 'business'
@@ -75,6 +78,14 @@ export const Payment = () => {
     queryKey: ['guilds'],
     queryFn: fetchGuilds,
   });
+
+  const hasShownGuildError = useRef(false);
+
+  useEffect(() => {
+    if (!isGuildsError || hasShownGuildError.current) return;
+    hasShownGuildError.current = true;
+    alert.error('Failed to load your servers. Please refresh and try again.');
+  }, [alert, isGuildsError]);
 
   // Theme is provided globally by AppProvider.
 

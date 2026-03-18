@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+// @ts-expect-error react-alert ships without TS types in this repo
+import { useAlert } from 'react-alert';
 import { api } from '../../lib/api';
 import { FaServer } from 'react-icons/fa';
 import { DashboardHeaderSection } from './HeaderSection';
@@ -20,10 +22,18 @@ const BOT_INVITE_BASE_URL =
 
 export const Dashboard = () => {
   const params = useParams<{ guildId?: string }>();
+  const alert = useAlert();
   const { data: guilds, isLoading, isError } = useQuery({
     queryKey: ['guilds'],
     queryFn: fetchGuilds,
   });
+
+  const hasShownGuildError = useRef(false);
+  useEffect(() => {
+    if (!isError || hasShownGuildError.current) return;
+    hasShownGuildError.current = true;
+    alert.error('Failed to load servers. Please refresh the page.');
+  }, [alert, isError]);
 
   const selectedGuild =
     guilds?.find((g) => String(g.id) === params.guildId) ?? null;
