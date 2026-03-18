@@ -19,7 +19,9 @@ export const AuthCallback = () => {
     const state = query.get('state');
 
     if (!code || !state) {
-      navigate('/login?error=missing_code', { replace: true });
+      // If callback params are missing, send the user to home instead of a
+      // non-existent /login page (prevents a brief 404 flash on Vercel).
+      navigate('/?error=missing_code', { replace: true });
       return;
     }
 
@@ -40,7 +42,9 @@ export const AuthCallback = () => {
           e?.message ||
           'Failed to complete Discord login. Please try again.';
         setError(msg);
-        navigate(`/login?error=${encodeURIComponent('oauth_failed')}`, {
+        // On error, also redirect to home with an error flag rather than /login
+        // to avoid hitting a missing route in the hosted marketing shell.
+        navigate(`/?error=${encodeURIComponent('oauth_failed')}`, {
           replace: true,
         });
       }
