@@ -24,60 +24,6 @@ const TONE_SAMPLE_REPLIES: Record<Tone, string> = {
 const entryChars = (entry: KnowledgeEntry) =>
   (entry.title?.length ?? 0) + (entry.content?.length ?? 0);
 
-function mockDailyTokenData(monthlyUsed: number): { date: string; tokens: number }[] {
-  const days = 7;
-  const now = new Date();
-  return Array.from({ length: days }, (_, i) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() - (days - 1 - i));
-    const label = d.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-    const tokens =
-      i === days - 1
-        ? monthlyUsed % 10000
-        : Math.floor((monthlyUsed / days) * (0.7 + Math.random() * 0.6));
-    return { date: label, tokens };
-  });
-}
-
-function mockRecentActivity(): ActivityRow[] {
-  return [
-    {
-      id: '1',
-      timestamp: new Date().toISOString(),
-      tokens: 120,
-      preview: 'How do I reset my password?',
-    },
-    {
-      id: '2',
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      tokens: 85,
-      preview: 'Refund policy question',
-    },
-    {
-      id: '3',
-      timestamp: new Date(Date.now() - 7200000).toISOString(),
-      tokens: 210,
-      preview: 'Account linking issue',
-    },
-    {
-      id: '4',
-      timestamp: new Date(Date.now() - 86400000).toISOString(),
-      tokens: 95,
-      preview: 'Billing inquiry',
-    },
-    {
-      id: '5',
-      timestamp: new Date(Date.now() - 172800000).toISOString(),
-      tokens: 150,
-      preview: 'Feature request',
-    },
-  ];
-}
-
 export const useSettings = (): UseSettingsResult => {
   const params = useParams<{ guildId?: string }>();
   const guildId = params.guildId;
@@ -186,11 +132,19 @@ export const useSettings = (): UseSettingsResult => {
     },
   });
 
+  const refreshKnowledge = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['knowledge', guildId] });
+    await queryClient.refetchQueries({
+      queryKey: ['knowledge', guildId],
+      type: 'active',
+    });
+  };
+
   const createKnowledgeMutation = useMutation({
     mutationFn: (payload: { title: string; content: string }) =>
       guildService.createKnowledge(guildId!, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['knowledge', guildId] });
+    onSuccess: async () => {
+      await refreshKnowledge();
       setToast({ type: 'success', message: 'Knowledge entry created.' });
       setModalOpen(false);
       setEditingEntry(null);
@@ -206,8 +160,8 @@ export const useSettings = (): UseSettingsResult => {
   const updateKnowledgeMutation = useMutation({
     mutationFn: (payload: { id: string; title: string; content: string }) =>
       guildService.updateKnowledge(guildId!, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['knowledge', guildId] });
+    onSuccess: async () => {
+      await refreshKnowledge();
       setToast({ type: 'success', message: 'Knowledge entry updated.' });
       setModalOpen(false);
       setEditingEntry(null);
@@ -222,8 +176,8 @@ export const useSettings = (): UseSettingsResult => {
 
   const deleteKnowledgeMutation = useMutation({
     mutationFn: (id: string) => guildService.deleteKnowledge(guildId!, id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['knowledge', guildId] });
+    onSuccess: async () => {
+      await refreshKnowledge();
       setToast({ type: 'success', message: 'Knowledge entry deleted.' });
     },
     onError: () => {

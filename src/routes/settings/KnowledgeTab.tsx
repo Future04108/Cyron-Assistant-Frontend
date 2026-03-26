@@ -1,6 +1,4 @@
 import { motion } from "framer-motion"
-
-import { KnowledgeEntry } from '../../services/guildService';
 import { Loader } from '../../components/ui/Loader';
 import { Button } from '../../components/ui/Button';
 
@@ -43,29 +41,31 @@ export const KnowledgeTab = ({
             transition={{ duration: 0.2 }}
             className="space-y-4"
         >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2">
-                    {knowledgeLoading && <Loader />}
-                </div>
-                <Button
-                    onClick={openCreateModal}
-                    disabled={knowledgeLoading}
-                    className="text-xs"
-                >
-                    Add New Entry
-                </Button>
-            </div>
-
-            {/* Knowledge capacity bar */}
-            <div className="rounded-xl bg-white p-4 shadow-soft">
-                <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-slate-700">Knowledge capacity</span>
-                    <span
-                        className={`font-mono ${usageRatio > 0.8 ? 'text-amber-500' : 'text-text-muted'
-                            }`}
-                    >
-                        {totalChars.toLocaleString()} / {maxChars.toLocaleString()} chars
-                    </span>
+            {/* Knowledge capacity bar + primary action */}
+            <motion.div
+                whileHover={{ y: -1 }}
+                className="rounded-xl bg-white p-4 shadow-soft"
+            >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700">Knowledge capacity</span>
+                        {knowledgeLoading && <Loader />}
+                    </div>
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <span
+                            className={`font-mono ${usageRatio > 0.8 ? 'text-amber-500' : 'text-text-muted'
+                                }`}
+                        >
+                            {totalChars.toLocaleString()} / {maxChars.toLocaleString()} chars
+                        </span>
+                        <Button
+                            onClick={openCreateModal}
+                            disabled={knowledgeLoading}
+                            className="px-4 py-2 text-xs"
+                        >
+                            Add New Entry
+                        </Button>
+                    </div>
                 </div>
                 <div className="mt-2 h-2 w-full rounded-full bg-slate-100">
                     <motion.div
@@ -82,7 +82,7 @@ export const KnowledgeTab = ({
                     Entries are limited per plan. Longer documents are chunked
                     automatically but still count towards your total character budget.
                 </p>
-            </div>
+            </motion.div>
 
             {/* Upgrade banner */}
             {showUpgradeBanner && (
@@ -107,6 +107,16 @@ export const KnowledgeTab = ({
             )}
 
             <div className="rounded-xl bg-white p-4 shadow-soft">
+                {knowledgeLoading && (
+                    <div className="space-y-2">
+                        {[...Array(3)].map((_, idx) => (
+                            <div
+                                key={idx}
+                                className="h-14 animate-pulse rounded-lg bg-slate-100/80"
+                            />
+                        ))}
+                    </div>
+                )}
                 {knowledgeError && !knowledgeLoading && (
                     <p className="text-sm text-red-500">
                         Failed to load knowledge entries. Please refresh the page.

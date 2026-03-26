@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-// @ts-expect-error react-alert ships without TS types in this repo
 import { useAlert } from 'react-alert';
 import { TopNav } from '../../components/layout/TopNav';
 import { Footer } from '../../components/layout/Footer';
@@ -282,57 +281,6 @@ export const Payment = () => {
                     </div>
                   </div>
 
-                  <div className="mt-6 space-y-2 text-sm">
-                    <p className={clsx('font-semibold', headingText)}>Select server</p>
-                    {isGuildsLoading && (
-                      <p className={clsx('flex items-center gap-2 text-xs', bodyText)}>
-                        <FaServer className="text-slate-400" />
-                        Loading your servers…
-                      </p>
-                    )}
-                    {isGuildsError && !isGuildsLoading && (
-                      <p className="text-xs text-red-600">
-                        Failed to load your servers. Please refresh the page.
-                      </p>
-                    )}
-                    {!isGuildsLoading && !isGuildsError && (
-                      <>
-                        <select
-                          value={selectedGuildId}
-                          onChange={(e) => {
-                            setSelectedGuildId(e.target.value);
-                            if (errors.guild) {
-                              setErrors((prev) => ({ ...prev, guild: '' }));
-                            }
-                          }}
-                          className={clsx(
-                            'mt-1 w-full rounded-lg border px-3 py-2 text-sm',
-                            errors.guild
-                              ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                              : isDark
-                                ? 'bg-slate-900/60 border-slate-700 text-slate-100'
-                                : 'bg-white border-slate-200 text-slate-900'
-                          )}
-                        >
-                          <option value="">Select a Discord server</option>
-                          {(guilds ?? []).map((g) => (
-                            <option key={g.id} value={String(g.id)}>
-                              {g.name}
-                              {g.has_bot ? '' : ' (bot not installed)'}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.guild && (
-                          <p className="mt-1 text-xs text-red-600">{errors.guild}</p>
-                        )}
-                        <p className={clsx('text-[11px] leading-snug', bodyText)}>
-                          Payments are applied per Discord server. Choose which server this
-                          {plan === 'business' ? ' Business' : ' Pro'} plan should upgrade.
-                        </p>
-                      </>
-                    )}
-                  </div>
-
                   <div className="mb-6">
                     {planData?.description && (
                       <p className={clsx('mb-4 text-sm', isDark ? accent.color : accent.darkColor)}>
@@ -376,7 +324,86 @@ export const Payment = () => {
               </div>
 
               {/* Payment Form */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 space-y-6">
+                <motion.div
+                  className={clsx(
+                    'rounded-3xl border p-6 shadow-sm',
+                    isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200',
+                  )}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: 0.05 }}
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className={clsx('text-xs font-semibold uppercase tracking-[0.2em]', bodyText)}>
+                        Step 1
+                      </p>
+                      <h2 className={clsx('mt-1 text-base font-semibold', headingText)}>
+                        Select server
+                      </h2>
+                      <p className={clsx('mt-1 text-sm', bodyText)}>
+                        Apply {plan === 'business' ? 'Business' : 'Pro'} to one Discord server.
+                      </p>
+                    </div>
+
+                    <div className="w-full sm:max-w-sm">
+                      {isGuildsLoading && (
+                        <div className={clsx('flex items-center gap-2 text-sm', bodyText)}>
+                          <FaServer className="text-slate-400" />
+                          Loading your servers…
+                        </div>
+                      )}
+
+                      {isGuildsError && !isGuildsLoading && (
+                        <div
+                          className={clsx(
+                            'rounded-xl border p-3 text-sm',
+                            isDark
+                              ? 'border-red-500/30 bg-red-500/10 text-red-200'
+                              : 'border-red-200 bg-red-50 text-red-700',
+                          )}
+                        >
+                          Failed to load your servers. Please refresh and try again.
+                        </div>
+                      )}
+
+                      {!isGuildsLoading && !isGuildsError && (
+                        <>
+                          <select
+                            value={selectedGuildId}
+                            onChange={(e) => {
+                              setSelectedGuildId(e.target.value);
+                              if (errors.guild) {
+                                setErrors((prev) => ({ ...prev, guild: '' }));
+                              }
+                            }}
+                            className={clsx(
+                              'w-full rounded-xl border px-4 py-3 text-sm transition',
+                              errors.guild
+                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                                : inputBase,
+                            )}
+                          >
+                            <option value="">Select a Discord server</option>
+                            {(guilds ?? []).map((g) => (
+                              <option key={g.id} value={String(g.id)}>
+                                {g.name}
+                                {g.has_bot ? '' : ' (bot not installed)'}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.guild && (
+                            <p className={clsx('mt-2 text-sm', isDark ? 'text-red-200' : 'text-red-600')}>
+                              {errors.guild}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+
                 <motion.div
                   className={clsx('rounded-3xl border p-8 shadow-sm', formSurface)}
                   initial={{ opacity: 0, y: 20 }}

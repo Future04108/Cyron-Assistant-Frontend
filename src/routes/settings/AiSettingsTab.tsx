@@ -38,7 +38,10 @@ export const AiSettingsTab = ({
       transition={{ duration: 0.2 }}
       className="space-y-4"
     >
-      <div className="rounded-xl bg-white p-4 shadow-soft">
+      <motion.div
+        whileHover={{ y: -1 }}
+        className="rounded-xl bg-white p-5 shadow-soft"
+      >
         <div className="mb-3 flex items-center justify-between">
           <label className="text-xs font-semibold text-slate-700">System prompt</label>
           <div className="flex items-center gap-2">
@@ -66,7 +69,7 @@ export const AiSettingsTab = ({
           className="min-h-[160px] w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-primary/40 focus:bg-white focus:ring"
           placeholder="e.g. You are a helpful support assistant for..."
         />
-        <div className="mt-3">
+        <div className="mt-4">
           <label className="mb-1 block text-xs font-medium text-slate-600">Tone</label>
           <select
             value={localTone}
@@ -80,7 +83,7 @@ export const AiSettingsTab = ({
             ))}
           </select>
         </div>
-        <div className="mt-3">
+        <div className="mt-4">
           <Button
             type="button"
             variant="ghost"
@@ -110,7 +113,7 @@ export const AiSettingsTab = ({
             </motion.div>
           )}
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

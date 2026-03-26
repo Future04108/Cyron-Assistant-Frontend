@@ -11,20 +11,6 @@ import { UsageTab } from './UsageSettingsTab';
 import { SystemPromptPreviewModal } from './SystemPromptPreviewModal';
 import { ToastAlert } from './ToastAlert';
 
-const TAB_TITLES: Record<string, string> = {
-  ai: 'AI Settings',
-  knowledge: 'Knowledge Base',
-  embed: 'Embed Customization',
-  usage: 'Usage Analytics',
-};
-
-const TAB_DESCRIPTIONS: Record<string, string> = {
-  ai: 'Configure Cyron Assistant\'s default behavior with a custom system prompt and tone.',
-  knowledge: 'Manage knowledge entries to teach Cyron Assistant about your products, policies, and workflows.',
-  embed: 'Customize the color and appearance of support ticket embeds for your server.',
-  usage: 'View recent AI activity, usage, and plan statistics for your server.',
-};
-
 export const Settings = () => {
   const [localTone, setLocalTone] = useState<Tone>('Professional');
   const {
@@ -106,18 +92,8 @@ export const Settings = () => {
     );
   }
 
-  const headerTitle = TAB_TITLES[view] || 'Settings';
-  const headerDescription =
-    TAB_DESCRIPTIONS[view] ||
-    'Configure AI behavior, manage knowledge base, customize embeds, and view usage for this server.';
-
   return (
     <>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 border border-slate-200">
-          JOB&nbsp;·&nbsp;free plan
-        </span>
-      </div>
       <motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -125,11 +101,6 @@ export const Settings = () => {
         transition={{ duration: 0.2, ease: 'easeOut' }}
         className="space-y-6"
       >
-        <header>
-          <h2 className="text-lg font-semibold tracking-tight">{headerTitle}</h2>
-          <p className="text-sm text-text-muted">{headerDescription}</p>
-        </header>
-
         <AnimatePresence mode="wait">
           {view === 'ai' && (
             <AiSettingsTab

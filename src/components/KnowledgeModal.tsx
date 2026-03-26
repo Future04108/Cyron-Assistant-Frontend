@@ -54,13 +54,17 @@ export const KnowledgeModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onClick={() => {
+            if (!isSubmitting) onClose();
+          }}
         >
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl"
+            className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-200/60"
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
@@ -104,6 +108,11 @@ export const KnowledgeModal = ({
                   onChange={(e) => setContent(e.target.value)}
                   className="min-h-[180px] w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-primary/40 focus:bg-white focus:ring"
                   placeholder="Write the knowledge article content here. You can paste FAQs, guides, or policies."
+                  onKeyDown={(e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                      void handleSubmit();
+                    }
+                  }}
                 />
               </div>
             </div>

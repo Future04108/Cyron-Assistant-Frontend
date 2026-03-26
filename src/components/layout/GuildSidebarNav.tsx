@@ -4,6 +4,7 @@ import {
   FaRobot,
   FaPalette,
   FaChartLine,
+  FaServer,
 } from 'react-icons/fa';
 
 type Tab = {
@@ -57,19 +58,55 @@ const sections: Section[] = [
     ],
   }
 ];
+type GuildSidebarNavProps = {
+  guild?: Guild | null;
+};
 
-export const GuildSidebarNav = () => {
+export const GuildSidebarNav = ({ guild }: GuildSidebarNavProps) => {
   const { guildId } = useParams<{ guildId?: string }>();
   const location = useLocation();
 
   if (!guildId) return null;
 
+  const displayName = (() => {
+    const name = guild?.name?.trim() || 'Server';
+    const MAX = 16;
+    return name.length > MAX ? `${name.slice(0, MAX)}…` : name;
+  })();
+
+  const planLabel = (() => {
+    const p = (guild?.plan ?? 'free').toLowerCase();
+    if (p === 'business') return 'Business plan';
+    if (p === 'pro') return 'Pro plan';
+    return 'Free plan';
+  })();
+
   return (
     <aside className="hidden w-64 min-h-[800px] flex-shrink-0 rounded-3xl border border-slate-200 bg-white/90 px-4 py-5 text-sm text-slate-800 shadow-sm md:block">
-      <div className="mb-4 px-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-          Server Management
-        </p>
+      <div className="mb-5 px-1">
+        <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2">
+          {guild?.icon_url ? (
+            <span className="inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+              <img
+                src={guild.icon_url}
+                alt={guild.name ?? 'Server icon'}
+                className="h-full w-full object-cover"
+              />
+            </span>
+          ) : (
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 text-slate-600">
+              <FaServer className="h-4 w-4" />
+            </span>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-900">
+              {displayName}
+            </p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              {planLabel}
+            </p>
+          </div>
+        </div>
       </div>
       <nav className="space-y-4">
         {sections.map((section) => (

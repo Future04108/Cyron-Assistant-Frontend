@@ -40,7 +40,10 @@ export const EmbedSettingsTab = ({
                     </div>
                 </motion.div>
             )}
-            <div className="rounded-xl bg-white p-4 shadow-soft">
+            <motion.div
+                whileHover={{ y: -1 }}
+                className="rounded-xl bg-white p-5 shadow-soft"
+            >
                 <label className="mb-2 block text-xs font-semibold text-slate-700">Embed color</label>
                 <div className="flex flex-wrap items-center gap-3">
                     <input
@@ -98,7 +101,7 @@ export const EmbedSettingsTab = ({
                         {updateGuildPending ? 'Saving…' : 'Save color'}
                     </Button>
                 )}
-            </div>
+            </motion.div>
         </motion.div>
     );
 }
