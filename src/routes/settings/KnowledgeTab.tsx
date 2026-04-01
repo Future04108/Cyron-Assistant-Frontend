@@ -3,7 +3,10 @@ import { Loader } from '../../components/ui/Loader';
 import { Button } from '../../components/ui/Button';
 
 const entryChars = (entry: KnowledgeEntry) =>
-    (entry.title?.length ?? 0) + (entry.content?.length ?? 0);
+    (entry.title?.length ?? 0) +
+    (entry.main_content?.length ?? entry.content?.length ?? 0) +
+    (entry.additional_context?.length ?? 0) +
+    (entry.behavior_notes?.length ?? 0);
 
 export const KnowledgeTab = ({
     knowledge,
@@ -147,10 +150,11 @@ export const KnowledgeTab = ({
                         <div className="space-y-2">
                             {knowledge.map((entry) => {
                                 const chars = entryChars(entry);
+                                const mainContent = entry.main_content ?? entry.content;
                                 const preview =
-                                    entry.content.length > 160
-                                        ? `${entry.content.slice(0, 160)}…`
-                                        : entry.content;
+                                    (mainContent?.length ?? 0) > 160
+                                        ? `${mainContent?.slice(0, 160)}…`
+                                        : mainContent;
                                 return (
                                     <motion.div
                                         key={entry.id}

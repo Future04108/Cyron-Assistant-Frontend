@@ -172,7 +172,9 @@ export const Settings = () => {
         isOpen={modalOpen}
         mode={modalMode}
         initialTitle={editingEntry?.title ?? ''}
-        initialContent={editingEntry?.content ?? ''}
+        initialMainContent={editingEntry?.main_content ?? editingEntry?.content ?? ''}
+        initialAdditionalContext={editingEntry?.additional_context ?? ''}
+        initialBehaviorNotes={editingEntry?.behavior_notes ?? ''}
         onClose={() => {
           if (createKnowledgePending || updateKnowledgePending) return;
           setModalOpen(false);

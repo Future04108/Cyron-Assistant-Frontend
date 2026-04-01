@@ -27,6 +27,9 @@ interface KnowledgeEntry {
   guild_id: number;
   title: string;
   content: string;
+  main_content?: string | null;
+  additional_context?: string | null;
+  behavior_notes?: string | null;
   created_at: string;
 }
 

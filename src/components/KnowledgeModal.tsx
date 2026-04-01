@@ -6,9 +6,16 @@ interface KnowledgeModalProps {
   isOpen: boolean;
   mode: 'create' | 'edit';
   initialTitle?: string;
-  initialContent?: string;
+  initialMainContent?: string;
+  initialAdditionalContext?: string;
+  initialBehaviorNotes?: string;
   onClose: () => void;
-  onSubmit: (data: { title: string; content: string }) => Promise<void> | void;
+  onSubmit: (data: {
+    title: string;
+    main_content: string;
+    additional_context?: string;
+    behavior_notes?: string;
+  }) => Promise<void> | void;
   isSubmitting?: boolean;
 }
 
@@ -16,22 +23,32 @@ export const KnowledgeModal = ({
   isOpen,
   mode,
   initialTitle = '',
-  initialContent = '',
+  initialMainContent = '',
+  initialAdditionalContext = '',
+  initialBehaviorNotes = '',
   onClose,
   onSubmit,
   isSubmitting = false,
 }: KnowledgeModalProps) => {
   const [title, setTitle] = useState(initialTitle);
-  const [content, setContent] = useState(initialContent);
+  const [mainContent, setMainContent] = useState(initialMainContent);
+  const [additionalContext, setAdditionalContext] = useState(initialAdditionalContext);
+  const [behaviorNotes, setBehaviorNotes] = useState(initialBehaviorNotes);
 
   useEffect(() => {
     if (isOpen) {
       setTitle(initialTitle);
-      setContent(initialContent);
+      setMainContent(initialMainContent);
+      setAdditionalContext(initialAdditionalContext);
+      setBehaviorNotes(initialBehaviorNotes);
     }
-  }, [isOpen, initialTitle, initialContent]);
+  }, [isOpen, initialTitle, initialMainContent, initialAdditionalContext, initialBehaviorNotes]);
 
-  const charCount = title.length + content.length;
+  const charCount =
+    title.length +
+    mainContent.length +
+    additionalContext.length +
+    behaviorNotes.length;
   const nearLimit = charCount >= 5600 && charCount <= 6000;
   const overLimit = charCount > 6000;
 
@@ -42,8 +59,13 @@ export const KnowledgeModal = ({
       : 'text-text-muted';
 
   const handleSubmit = async () => {
-    if (!title.trim() || !content.trim() || overLimit || isSubmitting) return;
-    await onSubmit({ title: title.trim(), content: content.trim() });
+    if (!title.trim() || !mainContent.trim() || overLimit || isSubmitting) return;
+    await onSubmit({
+      title: title.trim(),
+      main_content: mainContent.trim(),
+      additional_context: additionalContext.trim() || undefined,
+      behavior_notes: behaviorNotes.trim() || undefined,
+    });
   };
 
   return (
@@ -72,8 +94,7 @@ export const KnowledgeModal = ({
                   {mode === 'create' ? 'Add Knowledge Entry' : 'Edit Knowledge Entry'}
                 </h3>
                 <p className="mt-1 text-xs text-text-muted">
-                  Provide a clear title and detailed content. Longer docs will be
-                  chunked automatically by the backend.
+                  Define core facts first, then optional context and behavior guidance.
                 </p>
               </div>
               <button
@@ -101,18 +122,42 @@ export const KnowledgeModal = ({
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-700">
-                  Content
+                  Main Content
                 </label>
                 <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  value={mainContent}
+                  onChange={(e) => setMainContent(e.target.value)}
                   className="min-h-[180px] w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-primary/40 focus:bg-white focus:ring"
-                  placeholder="Write the knowledge article content here. You can paste FAQs, guides, or policies."
+                  placeholder="Core information Cyron must understand first."
                   onKeyDown={(e) => {
                     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                       void handleSubmit();
                     }
                   }}
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-700">
+                  Additional Context (optional)
+                </label>
+                <textarea
+                  value={additionalContext}
+                  onChange={(e) => setAdditionalContext(e.target.value)}
+                  className="min-h-[100px] w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-primary/40 focus:bg-white focus:ring"
+                  placeholder="Secondary details, examples, exceptions, edge cases."
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-700">
+                  Behavior Notes (optional)
+                </label>
+                <textarea
+                  value={behaviorNotes}
+                  onChange={(e) => setBehaviorNotes(e.target.value)}
+                  className="min-h-[100px] w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-primary/40 focus:bg-white focus:ring"
+                  placeholder="How the bot should respond: tone, style, escalation guidance."
                 />
               </div>
             </div>
@@ -135,7 +180,7 @@ export const KnowledgeModal = ({
                   type="button"
                   onClick={handleSubmit}
                   disabled={
-                    isSubmitting || overLimit || !title.trim() || !content.trim()
+                    isSubmitting || overLimit || !title.trim() || !mainContent.trim()
                   }
                   className="px-4 py-1 text-xs"
                 >

@@ -44,19 +44,31 @@ export const guildService = {
 
   async createKnowledge(
     guildId: string,
-    payload: { title: string; content: string },
+    payload: {
+      title: string;
+      content?: string;
+      main_content?: string;
+      additional_context?: string;
+      behavior_notes?: string;
+    },
   ) {
     return api.post(`/guilds/${guildId}/knowledge`, payload);
   },
 
   async updateKnowledge(
     guildId: string,
-    payload: { id: string; title: string; content: string },
+    payload: {
+      id: string;
+      title?: string;
+      content?: string;
+      main_content?: string;
+      additional_context?: string;
+      behavior_notes?: string;
+    },
   ) {
-    const { id, title, content } = payload;
+    const { id, ...body } = payload;
     return api.put(`/guilds/${guildId}/knowledge/${id}`, {
-      title,
-      content,
+      ...body,
     });
   },
 

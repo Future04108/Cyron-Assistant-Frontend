@@ -22,7 +22,10 @@ const TONE_SAMPLE_REPLIES: Record<Tone, string> = {
 };
 
 const entryChars = (entry: KnowledgeEntry) =>
-  (entry.title?.length ?? 0) + (entry.content?.length ?? 0);
+  (entry.title?.length ?? 0) +
+  (entry.main_content?.length ?? entry.content?.length ?? 0) +
+  (entry.additional_context?.length ?? 0) +
+  (entry.behavior_notes?.length ?? 0);
 
 export const useSettings = (): UseSettingsResult => {
   const params = useParams<{ guildId?: string }>();
@@ -141,7 +144,12 @@ export const useSettings = (): UseSettingsResult => {
   };
 
   const createKnowledgeMutation = useMutation({
-    mutationFn: (payload: { title: string; content: string }) =>
+    mutationFn: (payload: {
+      title: string;
+      main_content: string;
+      additional_context?: string;
+      behavior_notes?: string;
+    }) =>
       guildService.createKnowledge(guildId!, payload),
     onSuccess: async () => {
       await refreshKnowledge();
@@ -158,7 +166,13 @@ export const useSettings = (): UseSettingsResult => {
   });
 
   const updateKnowledgeMutation = useMutation({
-    mutationFn: (payload: { id: string; title: string; content: string }) =>
+    mutationFn: (payload: {
+      id: string;
+      title: string;
+      main_content: string;
+      additional_context?: string;
+      behavior_notes?: string;
+    }) =>
       guildService.updateKnowledge(guildId!, payload),
     onSuccess: async () => {
       await refreshKnowledge();
@@ -223,7 +237,12 @@ export const useSettings = (): UseSettingsResult => {
     setModalOpen(true);
   };
 
-  const handleSubmitKnowledge = async (data: { title: string; content: string }) => {
+  const handleSubmitKnowledge = async (data: {
+    title: string;
+    main_content: string;
+    additional_context?: string;
+    behavior_notes?: string;
+  }) => {
     if (!guildId) return;
     if (modalMode === 'create') {
       await createKnowledgeMutation.mutateAsync(data);

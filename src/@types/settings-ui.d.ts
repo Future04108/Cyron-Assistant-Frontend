@@ -53,7 +53,12 @@ interface UseSettingsResult {
   handleSaveEmbedColor: () => void;
   openCreateModal: () => void;
   openEditModal: (entry: KnowledgeEntry) => void;
-  handleSubmitKnowledge: (data: { title: string; content: string }) => Promise<void>;
+  handleSubmitKnowledge: (data: {
+    title: string;
+    main_content: string;
+    additional_context?: string;
+    behavior_notes?: string;
+  }) => Promise<void>;
   handleDeleteKnowledge: (entry: KnowledgeEntry) => void;
   createKnowledgePending: boolean;
   updateKnowledgePending: boolean;
