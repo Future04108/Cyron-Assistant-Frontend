@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { KnowledgeModal } from '../../components/KnowledgeModal';
+import { ProblemModal } from '../../components/ProblemModal';
 import { useSettings } from '../../hooks/useSettings';
 
 import { KnowledgeTab } from './KnowledgeTab';
@@ -10,6 +11,19 @@ import { EmbedSettingsTab } from './EmbedSettingsTab';
 import { UsageTab } from './UsageSettingsTab';
 import { SystemPromptPreviewModal } from './SystemPromptPreviewModal';
 import { ToastAlert } from './ToastAlert';
+
+function knowledgeEntryToHtml(entry: KnowledgeEntry | null): string {
+  if (!entry) return '';
+  const raw = (entry.main_content ?? entry.content ?? '').trim();
+  if (!raw) return '';
+  const esc = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return raw
+    .split('\n')
+    .filter((line) => line.length > 0)
+    .map((line) => `<p>${esc(line)}</p>`)
+    .join('');
+}
 
 export const Settings = () => {
   const [localTone, setLocalTone] = useState<Tone>('Professional');
@@ -48,8 +62,13 @@ export const Settings = () => {
     handleSavePrompt,
     handleSaveEmbedColor,
     openCreateModal,
+    openProblemModal,
+    problemModalOpen,
+    setProblemModalOpen,
     openEditModal,
     handleSubmitKnowledge,
+    handleAutoFormat,
+    handleSubmitProblem,
     handleDeleteKnowledge,
     createKnowledgePending,
     updateKnowledgePending,
@@ -149,6 +168,7 @@ export const Settings = () => {
               knowledgeLoading={knowledgeLoading}
               knowledgeError={knowledgeError}
               openCreateModal={openCreateModal}
+              openProblemModal={openProblemModal}
               openEditModal={openEditModal}
               handleDeleteKnowledge={handleDeleteKnowledge}
               deleteKnowledgePending={deleteKnowledgePending}
@@ -171,17 +191,31 @@ export const Settings = () => {
       <KnowledgeModal
         isOpen={modalOpen}
         mode={modalMode}
+        serverName={guild?.name ?? ''}
+        guildId={guildId}
         initialTitle={editingEntry?.title ?? ''}
-        initialMainContent={editingEntry?.main_content ?? editingEntry?.content ?? ''}
-        initialAdditionalContext={editingEntry?.additional_context ?? ''}
-        initialBehaviorNotes={editingEntry?.behavior_notes ?? ''}
+        initialSource={editingEntry?.source ?? ''}
+        initialContentHtml={knowledgeEntryToHtml(editingEntry)}
+        initialTemplateType={editingEntry?.template_type ?? 'general_knowledge'}
         onClose={() => {
           if (createKnowledgePending || updateKnowledgePending) return;
           setModalOpen(false);
           setEditingEntry(null);
         }}
         onSubmit={handleSubmitKnowledge}
+        onAutoFormat={handleAutoFormat}
         isSubmitting={createKnowledgePending || updateKnowledgePending}
+      />
+
+      <ProblemModal
+        isOpen={problemModalOpen}
+        serverName={guild?.name ?? ''}
+        onClose={() => {
+          if (createKnowledgePending) return;
+          setProblemModalOpen(false);
+        }}
+        onSubmit={handleSubmitProblem}
+        isSubmitting={createKnowledgePending}
       />
 
       <ToastAlert toast={toast} />

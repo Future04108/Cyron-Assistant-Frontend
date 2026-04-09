@@ -42,6 +42,17 @@ export const guildService = {
     return api.patch(`/guilds/${guildId}`, payload);
   },
 
+  async formatKnowledge(
+    guildId: string,
+    payload: { raw_text: string; template_type: string; title_hint?: string },
+  ) {
+    const res = await api.post<KnowledgeFormatResult>(
+      `/guilds/${guildId}/knowledge/format`,
+      payload,
+    );
+    return res.data;
+  },
+
   async createKnowledge(
     guildId: string,
     payload: {
@@ -50,6 +61,10 @@ export const guildService = {
       main_content?: string;
       additional_context?: string;
       behavior_notes?: string;
+      template_type?: string;
+      template_payload?: Record<string, unknown> | null;
+      source?: string | null;
+      persist_mode?: 'pipeline' | 'structured';
     },
   ) {
     return api.post(`/guilds/${guildId}/knowledge`, payload);
@@ -64,6 +79,10 @@ export const guildService = {
       main_content?: string;
       additional_context?: string;
       behavior_notes?: string;
+      template_type?: string;
+      template_payload?: Record<string, unknown> | null;
+      source?: string | null;
+      persist_mode?: 'pipeline' | 'structured';
     },
   ) {
     const { id, ...body } = payload;

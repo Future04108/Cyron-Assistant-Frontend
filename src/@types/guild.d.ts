@@ -22,6 +22,12 @@ interface UsageStats {
   concurrent_limit: number;
 }
 
+type KnowledgeTemplateType =
+  | 'general_knowledge'
+  | 'problem_solution'
+  | 'product_info'
+  | 'behavior_rule';
+
 interface KnowledgeEntry {
   id: string;
   guild_id: number;
@@ -30,7 +36,18 @@ interface KnowledgeEntry {
   main_content?: string | null;
   additional_context?: string | null;
   behavior_notes?: string | null;
+  template_type?: KnowledgeTemplateType | string;
+  template_payload?: Record<string, unknown> | null;
+  source?: string | null;
   created_at: string;
 }
 
-
+interface KnowledgeFormatResult {
+  title: string;
+  template_type: string;
+  main_content: string;
+  additional_context?: string | null;
+  behavior_notes?: string | null;
+  template_payload?: Record<string, unknown> | null;
+  content_markdown: string;
+}

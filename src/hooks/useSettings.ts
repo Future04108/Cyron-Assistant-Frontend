@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  guildService
-} from '../services/guildService';
+import { guildService } from '../services/guildService';
+import type { KnowledgeSubmitPayload } from '../components/KnowledgeModal';
+import { htmlToPlainText } from '../components/RichTextEditor';
 
 const PLAN_CHAR_LIMITS: Record<string, number> = {
   free: 20000,
@@ -46,6 +46,7 @@ export const useSettings = (): UseSettingsResult => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingEntry, setEditingEntry] = useState<KnowledgeEntry | null>(null);
+  const [problemModalOpen, setProblemModalOpen] = useState(false);
 
   const view = useMemo(() => {
     const path = location.pathname;
@@ -120,6 +121,7 @@ export const useSettings = (): UseSettingsResult => {
     setTestReply(null);
     setModalOpen(false);
     setEditingEntry(null);
+    setProblemModalOpen(false);
   }, [view]);
 
   const updateGuildMutation = useMutation({
@@ -144,12 +146,7 @@ export const useSettings = (): UseSettingsResult => {
   };
 
   const createKnowledgeMutation = useMutation({
-    mutationFn: (payload: {
-      title: string;
-      main_content: string;
-      additional_context?: string;
-      behavior_notes?: string;
-    }) =>
+    mutationFn: (payload: Parameters<typeof guildService.createKnowledge>[1]) =>
       guildService.createKnowledge(guildId!, payload),
     onSuccess: async () => {
       await refreshKnowledge();
@@ -166,13 +163,7 @@ export const useSettings = (): UseSettingsResult => {
   });
 
   const updateKnowledgeMutation = useMutation({
-    mutationFn: (payload: {
-      id: string;
-      title: string;
-      main_content: string;
-      additional_context?: string;
-      behavior_notes?: string;
-    }) =>
+    mutationFn: (payload: Parameters<typeof guildService.updateKnowledge>[1]) =>
       guildService.updateKnowledge(guildId!, payload),
     onSuccess: async () => {
       await refreshKnowledge();
@@ -231,27 +222,76 @@ export const useSettings = (): UseSettingsResult => {
     setModalOpen(true);
   };
 
+  const openProblemModal = () => {
+    setProblemModalOpen(true);
+  };
+
   const openEditModal = (entry: KnowledgeEntry) => {
     setModalMode('edit');
     setEditingEntry(entry);
     setModalOpen(true);
   };
 
-  const handleSubmitKnowledge = async (data: {
-    title: string;
-    main_content: string;
-    additional_context?: string;
-    behavior_notes?: string;
-  }) => {
+  const handleSubmitKnowledge = async (payload: KnowledgeSubmitPayload) => {
     if (!guildId) return;
+    if (payload.persistMode === 'structured' && payload.structured) {
+      const s = payload.structured;
+      const body = {
+        title: payload.title,
+        source: payload.source,
+        content: s.content_markdown,
+        main_content: s.main_content,
+        additional_context: s.additional_context ?? undefined,
+        behavior_notes: s.behavior_notes ?? undefined,
+        template_type: s.template_type,
+        template_payload: s.template_payload ?? undefined,
+        persist_mode: 'structured' as const,
+      };
+      if (modalMode === 'create') {
+        await createKnowledgeMutation.mutateAsync(body);
+      } else if (editingEntry) {
+        await updateKnowledgeMutation.mutateAsync({ id: editingEntry.id, ...body });
+      }
+      return;
+    }
+    const plain = htmlToPlainText(payload.contentHtml);
+    const pipelineBody = {
+      title: payload.title,
+      source: payload.source,
+      content: plain,
+      main_content: plain,
+      persist_mode: 'pipeline' as const,
+    };
     if (modalMode === 'create') {
-      await createKnowledgeMutation.mutateAsync(data);
+      await createKnowledgeMutation.mutateAsync(pipelineBody);
     } else if (editingEntry) {
       await updateKnowledgeMutation.mutateAsync({
         id: editingEntry.id,
-        ...data,
+        ...pipelineBody,
       });
     }
+  };
+
+  const handleAutoFormat = (args: {
+    raw_text: string;
+    template_type: string;
+    title_hint: string;
+  }) => guildService.formatKnowledge(guildId!, args);
+
+  const handleSubmitProblem = async (data: { problem: string; solution: string }) => {
+    if (!guildId) return;
+    const title =
+      data.problem.length > 120 ? `${data.problem.slice(0, 117).trim()}…` : data.problem.trim();
+    await createKnowledgeMutation.mutateAsync({
+      title: title || 'Support',
+      content: `## Problem\n${data.problem}\n\n## Solution\n${data.solution}`,
+      main_content: data.solution,
+      template_type: 'problem_solution',
+      template_payload: { problem: data.problem, solution: data.solution },
+      additional_context: data.problem,
+      persist_mode: 'structured',
+    });
+    setProblemModalOpen(false);
   };
 
   const handleDeleteKnowledge = (entry: KnowledgeEntry) => {
@@ -326,8 +366,13 @@ export const useSettings = (): UseSettingsResult => {
     handleSavePrompt,
     handleSaveEmbedColor,
     openCreateModal,
+    openProblemModal,
+    problemModalOpen,
+    setProblemModalOpen,
     openEditModal,
     handleSubmitKnowledge,
+    handleAutoFormat,
+    handleSubmitProblem,
     handleDeleteKnowledge,
     createKnowledgePending: createKnowledgeMutation.isPending,
     updateKnowledgePending: updateKnowledgeMutation.isPending,

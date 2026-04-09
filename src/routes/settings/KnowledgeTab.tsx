@@ -8,11 +8,23 @@ const entryChars = (entry: KnowledgeEntry) =>
     (entry.additional_context?.length ?? 0) +
     (entry.behavior_notes?.length ?? 0);
 
+const templateBadge = (t?: string | null) => {
+    const key = (t || 'general_knowledge').toLowerCase();
+    const labels: Record<string, string> = {
+        general_knowledge: 'General Knowledge',
+        problem_solution: 'Problem / Solution',
+        product_info: 'Product Info',
+        behavior_rule: 'Behavior Rule',
+    };
+    return labels[key] ?? key.replace(/_/g, ' ');
+};
+
 export const KnowledgeTab = ({
     knowledge,
     knowledgeLoading,
     knowledgeError,
     openCreateModal,
+    openProblemModal,
     openEditModal,
     handleDeleteKnowledge,
     deleteKnowledgePending,
@@ -26,6 +38,7 @@ export const KnowledgeTab = ({
     knowledgeLoading: boolean;
     knowledgeError: boolean;
     openCreateModal: () => void;
+    openProblemModal: () => void;
     openEditModal: (entry: KnowledgeEntry) => void;
     handleDeleteKnowledge: (entry: KnowledgeEntry) => void;
     deleteKnowledgePending: boolean;
@@ -61,13 +74,24 @@ export const KnowledgeTab = ({
                         >
                             {totalChars.toLocaleString()} / {maxChars.toLocaleString()} chars
                         </span>
-                        <Button
-                            onClick={openCreateModal}
-                            disabled={knowledgeLoading}
-                            className="px-4 py-2 text-xs"
-                        >
-                            Add New Entry
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                onClick={openCreateModal}
+                                disabled={knowledgeLoading}
+                                className="px-4 py-2 text-xs"
+                            >
+                                New Knowledge
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={openProblemModal}
+                                disabled={knowledgeLoading}
+                                className="border border-slate-200 px-4 py-2 text-xs"
+                            >
+                                New Problem
+                            </Button>
+                        </div>
                     </div>
                 </div>
                 <div className="mt-2 h-2 w-full rounded-full bg-slate-100">
@@ -140,9 +164,10 @@ export const KnowledgeTab = ({
 
                 {!knowledgeLoading && !knowledgeError && knowledge && knowledge.length > 0 && (
                     <div className="space-y-2">
-                        <div className="hidden grid-cols-[2fr,3fr,100px,150px,120px] gap-3 px-2 pb-1 text-[11px] font-medium text-slate-500 md:grid">
+                        <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_120px_80px_150px_120px] gap-3 px-2 pb-1 text-[11px] font-medium text-slate-500 md:grid">
                             <span>Title</span>
                             <span>Preview</span>
+                            <span>Template</span>
                             <span className="text-right">Chars</span>
                             <span>Created</span>
                             <span className="text-right">Actions</span>
@@ -164,7 +189,7 @@ export const KnowledgeTab = ({
                                             y: -1,
                                             boxShadow: '0 10px 30px rgba(15,23,42,0.08)',
                                         }}
-                                        className="rounded-lg border border-slate-100 bg-white px-3 py-3 text-xs transition-colors md:grid md:grid-cols-[2fr,3fr,100px,150px,120px] md:items-center md:gap-3"
+                                        className="rounded-lg border border-slate-100 bg-white px-3 py-3 text-xs transition-colors md:grid md:grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_120px_80px_150px_120px] md:items-center md:gap-3"
                                     >
                                         <div className="mb-2 md:mb-0">
                                             <p className="font-semibold text-slate-800">
@@ -173,6 +198,11 @@ export const KnowledgeTab = ({
                                         </div>
                                         <div className="mb-2 text-[11px] text-text-muted md:mb-0">
                                             {preview || <span className="italic">No content</span>}
+                                        </div>
+                                        <div className="mb-2 md:mb-0">
+                                            <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                                {templateBadge(entry.template_type)}
+                                            </span>
                                         </div>
                                         <div className="mb-2 text-right font-mono text-[11px] text-slate-700 md:mb-0">
                                             {chars.toLocaleString()}

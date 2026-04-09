@@ -52,13 +52,19 @@ interface UseSettingsResult {
   handleSavePrompt: () => void;
   handleSaveEmbedColor: () => void;
   openCreateModal: () => void;
+  openProblemModal: () => void;
+  problemModalOpen: boolean;
+  setProblemModalOpen: (value: boolean) => void;
   openEditModal: (entry: KnowledgeEntry) => void;
-  handleSubmitKnowledge: (data: {
-    title: string;
-    main_content: string;
-    additional_context?: string;
-    behavior_notes?: string;
-  }) => Promise<void>;
+  handleSubmitKnowledge: (
+    data: import('../components/KnowledgeModal').KnowledgeSubmitPayload,
+  ) => Promise<void>;
+  handleAutoFormat: (args: {
+    raw_text: string;
+    template_type: string;
+    title_hint: string;
+  }) => Promise<KnowledgeFormatResult>;
+  handleSubmitProblem: (data: { problem: string; solution: string }) => Promise<void>;
   handleDeleteKnowledge: (entry: KnowledgeEntry) => void;
   createKnowledgePending: boolean;
   updateKnowledgePending: boolean;
